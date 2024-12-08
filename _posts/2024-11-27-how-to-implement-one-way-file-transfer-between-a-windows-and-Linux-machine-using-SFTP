@@ -1,0 +1,74 @@
+---
+layout: post
+title: "How to implement one-way file transfer between a Windows and Linux machine using SFTP"
+date: 2024-10-11 20:44:24 +0530
+categories: Windows
+published: false
+---
+# How to securely pull files from windows to linux machine in read-only mode
+
+In my office workspace, we used a single windows computer which is used by a bunch of employes to browse the internet. Employees connect from their Linux machines to the windows machine via RDP, using separate user accounts. One day, I received a problem statement in which the employees need to move files downloaded from the windows machine to their local machine. However, the transit should be one-way as we cannot allow anyone to exfiltrate sensitive information from the company. Here's how I solved the problem using a combination of SSH restrictions and Windows access control settings. 
+
+**Caveat: This runbook is based on Windows 10. This runbook works for Windows 11 too. But the steps that I've given may slightly change based on new Windows update.**
+
+## Install OpenSSH server
+
+We need an SSH server installed in the machine which is the source of files as we are going to move files via SFTP. 
+
+- Go to windows settings
+- Search for the keyword `feature`. 
+- Go to `Optional features`. 
+- In the `Add an optional feature` section, click on `View features`. 
+- Search for the keyword `ssh` in the list of optional features. 
+- Select `OpenSSH Server` and click next; click install. 
+
+## Create a user in the Windows machine, dedicated for using SFTP
+
+Let's create a user account in the Windows machine. We are going to enforce various restrictions for this user to limit their ability to file pulling. 
+
+- Go to settings --> Accounts --> Other Users 
+- Click on `Add account`
+- Choose `I don't have this person's sign-in information` to simplify the user creation process without linking your Microsoft account. 
+- Enter a user name and password, say sftp_user. 
+
+## Edit the SSH configuration 
+
+OpenSSH configuration provides us the flexibility to impose various restriction on the basis of login account. Open the SSH configuration file in a text editor. The file is usually located in the below path in windows:-
+
+``` C:\ProgramData\ssh\ssh_config ```
+
+**Note: The `ProgramData` folder in windows is hidden by default. To view hidden files in file explorer, select `view` option in the top menu and check the `hidden items` checkbox **
+
+After opening the SSH configuration file, append the below lines of text to the file. 
+
+```puppet
+##########################################################################################
+#Configuration to to restricted scp_user in windows machine 
+##########################################################################################
+
+AllowUsers sftp_user 
+
+Match User sftp_user
+  ForceCommand internal-sftp
+  ChrootDirectory D:\jail
+  PermitTTY no
+  AllowAgentForwarding no
+  AllowTcpForwarding no
+  X11Forwarding no
+```
+
+Lets break down the above lines of configuration. 
+
+| Directive | Description | 
+| --------- | ----------- |
+| AllowUsers scp_user | To allow only the scp_user to login to the machine via SSH. We are implementing the concept of white list, here. | 
+| Match User scp_user | The configuration lines after this directive applies to the `scp_user` only. 
+| ForceCommand internal-sftp | This makes the SSH server launch an SFTP shell whenever the uses logs in. The user is thus forced to use SFTP here. |
+| ChrootDirectory D:\jail | To change the root directory of the user to the specified directory. The user will thus be confined inside the mentioned directory. |
+| PermitTTY no| To deny the logged in user from getting an interactive Shell (other than the SFTP prompt). |
+| AllowAgentForwarding no | To prevent the user from authenticating to other hosts via the windows machine. | 
+| AllowTcpForwarding no | To forbid the user from forwarding TCP traffic to other hosts via the windows machine. | 
+| X11Forwarding no | To deny the user from getting GUI access to the machine. | 
+
+## Setting up the root directory for the SFTP user 
+

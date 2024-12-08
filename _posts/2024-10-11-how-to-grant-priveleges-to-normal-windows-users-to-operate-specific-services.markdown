@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "How to grant priveleges to normal windows users to operate specific services"
-date: 2024-08-28 20:44:24 +0530
+date: 2024-10-11 20:44:24 +0530
 categories: Windows
 ---
 # How to grant priveleges to normal windows users to operate specific services
