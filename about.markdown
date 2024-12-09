@@ -4,6 +4,8 @@ title: About
 permalink: /about/
 ---
 
+![Headshot image](/assets/headshot.jpg)
+
 ### Google Professional Cloud Security Engineer (PCSE) | ISC2 member and Certified in Cybersecurity (CC) | DevOps | Sys admin (Linux and Windows) | Self-taught Ethical Hacker | Technical Writer
 
 I'm a person who keeps moral and ethical values above everything else. I strongly believe in the power of knowledge and I'm chasing the same in my favorite field - IT. After all, I love playing in the IT operations theatre :)
