@@ -1,9 +1,7 @@
 ---
 layout: post
-title: "How to implement one-way file transfer between a Windows and Linux machine using SFTP"
-date: 2024-10-11 20:44:24 +0530
-categories: Windows
-published: true
+title: "How to configure a local time server using Chrony"
+categories: linux time-server chrony ntp
 ---
 
 # How to configure a local time server using Chrony 
